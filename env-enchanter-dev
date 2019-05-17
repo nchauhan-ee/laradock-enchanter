@@ -1,7 +1,7 @@
 ### Docker Host IP ########################################
 
 # Enter your Docker Host IP (will be appended to /etc/hosts). Default is `10.0.75.1`
-DOCKER_HOST_IP=10.0.75.1
+DOCKER_HOST_IP=192.168.1.114
 
 ###########################################################
 ###################### General Setup ######################
@@ -222,7 +222,7 @@ APACHE_DOCUMENT_ROOT=/var/www/
 
 ### MYSQL #################################################
 
-MYSQL_VERSION=latest
+MYSQL_VERSION=5.7
 MYSQL_DATABASE=default
 MYSQL_USER=default
 MYSQL_PASSWORD=secret

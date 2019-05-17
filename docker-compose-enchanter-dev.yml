@@ -281,33 +281,6 @@ services:
     networks:
       - backend
 
-  ### PostgreSQL ###########################################
-  postgres:
-    build: ./postgres
-    volumes:
-      - ${DATA_PATH_HOST}/postgres:/var/lib/postgresql/data
-      - ${POSTGRES_ENTRYPOINT_INITDB}:/docker-entrypoint-initdb.d
-    ports:
-      - "${POSTGRES_PORT}:5432"
-    environment:
-      - POSTGRES_DB=${POSTGRES_DB}
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - GITLAB_POSTGRES_INIT=${GITLAB_POSTGRES_INIT}
-      - GITLAB_POSTGRES_USER=${GITLAB_POSTGRES_USER}
-      - GITLAB_POSTGRES_PASSWORD=${GITLAB_POSTGRES_PASSWORD}
-      - GITLAB_POSTGRES_DB=${GITLAB_POSTGRES_DB}
-      - JUPYTERHUB_POSTGRES_INIT=${JUPYTERHUB_POSTGRES_INIT}
-      - JUPYTERHUB_POSTGRES_USER=${JUPYTERHUB_POSTGRES_USER}
-      - JUPYTERHUB_POSTGRES_PASSWORD=${JUPYTERHUB_POSTGRES_PASSWORD}
-      - JUPYTERHUB_POSTGRES_DB=${JUPYTERHUB_POSTGRES_DB}
-      - SONARQUBE_POSTGRES_INIT=${SONARQUBE_POSTGRES_INIT}
-      - SONARQUBE_POSTGRES_DB=${SONARQUBE_POSTGRES_DB}
-      - SONARQUBE_POSTGRES_USER=${SONARQUBE_POSTGRES_USER}
-      - SONARQUBE_POSTGRES_PASSWORD=${SONARQUBE_POSTGRES_PASSWORD}
-    networks:
-      - backend
-
   ### Redis ################################################
   redis:
     build: ./redis
@@ -345,57 +318,6 @@ services:
       - frontend
       - backend
 
-  ### ElasticSearch ########################################
-  elasticsearch:
-    build: ./elasticsearch
-    volumes:
-      - elasticsearch:/usr/share/elasticsearch/data
-    environment:
-      - cluster.name=laradock-cluster
-      - bootstrap.memory_lock=true
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
-    ports:
-      - "${ELASTICSEARCH_HOST_HTTP_PORT}:9200"
-      - "${ELASTICSEARCH_HOST_TRANSPORT_PORT}:9300"
-    depends_on:
-      - php-fpm
-    networks:
-      - frontend
-      - backend
-
-  ### Logstash ##############################################
-  logstash:
-    build: ./logstash
-    volumes:
-      - './logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml'
-      - './logstash/pipeline:/usr/share/logstash/pipeline'
-    ports:
-      - '5001:5001'
-    environment:
-      LS_JAVA_OPTS: '-Xmx1g -Xms1g'
-    env_file:
-      - .env
-    networks:
-      - frontend
-      - backend
-    depends_on:
-      - elasticsearch
-
-  ### Kibana ##############################################
-  kibana:
-    build: ./kibana
-    ports:
-      - "${KIBANA_HTTP_PORT}:5601"
-    depends_on:
-      - elasticsearch
-    networks:
-      - frontend
-      - backend
-
   ### Certbot #########################################
   certbot:
     build:
@@ -409,16 +331,6 @@ services:
     networks:
       - frontend
 
-  ### Mailhog ################################################
-  mailhog:
-    build: ./mailhog
-    ports:
-      - "1025:1025"
-      - "8025:8025"
-    networks:
-      - frontend
-      - backend
-
   ### Portainer ################################################
   portainer:
     build:
@@ -430,18 +342,6 @@ services:
       - "dockerhost:${DOCKER_HOST_IP}"
     ports:
       - 9010:9000
-    networks:
-      - backend
-
-  ### NetData ################################################
-  netdata:
-    image: titpetric/netdata:latest
-    cap_add:
-      - SYS_PTRACE
-    volumes:
-      - /:/host:ro
-    ports:
-      - "${NETDATA_PORT}:19999"
     networks:
       - backend
 
@@ -471,26 +371,3 @@ services:
       - "${IDE_THEIA_PORT}:3000"
     networks:
       - backend
-
-  ### SONARQUBE ################################################
-  sonarqube:
-    build:
-      context: ./sonarqube
-    hostname: "${SONARQUBE_HOSTNAME}"
-    volumes:
-      - ${DATA_PATH_HOST}/sonarqube/conf:/opt/sonarqube/conf
-      - ${DATA_PATH_HOST}/sonarqube/data:/opt/sonarqube/data
-      - ${DATA_PATH_HOST}/sonarqube/logs:/opt/sonarqube/logs
-      - ${DATA_PATH_HOST}/sonarqube/extensions:/opt/sonarqube/extensions
-      - ${DATA_PATH_HOST}/sonarqube/plugins:/opt/sonarqube/lib/bundled-plugins
-    ports:
-      - ${SONARQUBE_PORT}:9000
-    depends_on:
-      - postgres
-    environment:
-      - sonar.jdbc.username=${SONARQUBE_POSTGRES_USER}
-      - sonar.jdbc.password=${SONARQUBE_POSTGRES_PASSWORD}
-      - sonar.jdbc.url=jdbc:postgresql://${SONARQUBE_POSTGRES_HOST}:5432/${SONARQUBE_POSTGRES_DB}
-    networks:
-      - backend
-      - frontend
