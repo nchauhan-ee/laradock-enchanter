@@ -14,7 +14,7 @@ default_build () {
     exit 1
   fi
 
-  log "Building $APP_NAME with version $VERSION."
+  log "Building.... $APP_NAME with version $VERSION."
 
   docker build --build-arg VERSION="${VERSION}" --no-cache --rm -t "${APP_NAME}:${VERSION}" .
 }
