@@ -17,5 +17,5 @@ default_build () {
 
   log "Building $CONTAINER_REGISTRY:$VERSION."
 
-  docker build --no-cache --rm -t "${CONTAINER_REGISTRY}:${VERSION}" .
+  docker build --no-cache --rm -t "${CONTAINER_REGISTRY}:${VERSION}" -t "${CONTAINER_REGISTRY}:latest" .
 }
